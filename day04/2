@@ -1,0 +1,90 @@
+import fs from 'fs';
+
+const puzzle : any = fs.readFileSync("./day04/trial.txt")
+.toString("utf-8")
+
+type TmatchAll = [string, index: number]
+
+// For Vector
+const regexp = /XMAS/g
+const regexp1 = /SAMX/g
+const horizontal_num = [...puzzle.matchAll(regexp)].map((ele: RegExpExecArray) => {
+    return ele[0]
+}).length
+const horizontal_num1 = [...puzzle.matchAll(regexp1)].map((ele: RegExpExecArray) => {
+    return ele[0]
+}).length
+console.log('horizontal_num',horizontal_num + horizontal_num1)
+
+// For Matrix
+const matrix = puzzle
+.split('\n')
+
+//console.log('matrix', matrix)
+const fc = /X/g // TODO Later Add S Too
+const sc = /M/g
+const tc = /A/g
+const foc = /S/g
+
+
+let counter = horizontal_num + horizontal_num1;
+const matrix_num = matrix
+.forEach((ele: string, ind: number) => {
+
+    const vertical_num_a: number = [...ele.matchAll(fc)]
+    .map((ele1: RegExpExecArray, index: number) => vertical_check(ele, ele1, index, ind, true))
+    .filter((ele1) => ele1 > 0)
+    .reduce((acc:number, ele:number) => acc + ele, 0)
+
+    const vertical_num_b: number = [...ele.matchAll(foc)]
+    .map((ele1: RegExpExecArray, index: number) => vertical_check(ele, ele1, index, ind, false))
+    .filter((ele1) => ele1)
+    .reduce((acc:number, ele:number) => acc + ele, 0)
+
+    counter += (vertical_num_a + vertical_num_b)
+})
+
+function vertical_check(line: string, ele: RegExpExecArray, index: number, vertical_index: number, regexOrder: boolean) {
+    const regexArr = [sc, tc, foc]
+    if (!regexOrder){
+	regexArr.pop()
+	regexArr.reverse().push(fc)
+    }
+    const vertical_ab = vertical_below(vertical_index, ele.index, regexArr) ? 1 : 0
+    const vertical_side_ahead = vertical_sideway(line, vertical_index, ele.index, true, regexArr) ? 1 : 0
+    const vertical_side_behind = vertical_sideway(line, vertical_index, ele.index, false, regexArr) ? 1 : 0
+    return vertical_ab + vertical_side_ahead + vertical_side_behind;
+}
+
+function vertical_sideway(line: string, vertical_index: number, ele_index: number, ahead: boolean, regexArr: RegExp[]) {
+    if (vertical_index >= matrix.length - 4) return false;
+
+    if (ele_index > line.length - 2) {
+	console.log('line.length', ele_index, line.length - 3)
+	return false
+    };
+
+    if (!at_char_match(vertical_index + 1, ele_index + (ahead? 1 : -1 ), regexArr[0])) return false;
+    if (!at_char_match(vertical_index + 2, ele_index + (ahead? 2 : -2 ), regexArr[1]))  return false;
+    if (!at_char_match(vertical_index + 3, ele_index + (ahead? 3 : -3 ), regexArr[2])) return false;
+    return true;
+}
+
+function vertical_below(vertical_index: number, ele_index: number, regexArr: RegExp[]) {
+    if (vertical_index >= matrix.length - 4) return false;
+    // Below
+    if (!at_char_match(vertical_index + 1, ele_index, regexArr[0])) return false;
+    if (!at_char_match(vertical_index + 2, ele_index, regexArr[1]))  return false;
+    if (!at_char_match(vertical_index + 3, ele_index, regexArr[2])) return false;
+    return true;
+}
+
+function at_char_match(line_num: number, ele_index: number, regex: RegExp) {
+    const char = matrix[line_num].at(ele_index)
+
+    if (char && char.match(regex)) return true
+    return false
+}
+
+
+console.log('counter', counter)
