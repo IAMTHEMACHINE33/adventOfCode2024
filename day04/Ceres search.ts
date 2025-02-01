@@ -135,5 +135,5 @@ function at_char_match(line_num: number, ele_index: number, regex: RegExp) {
     return false
 }
 
-console.log('from day 03 Task01', counter);
-console.log('from day 03 Task02', second_counter);
+console.log('from day 04 Task01', counter);
+console.log('from day 04 Task02', second_counter);
